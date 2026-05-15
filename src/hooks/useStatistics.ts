@@ -24,7 +24,7 @@ export function useStatistics() {
     [loadStats]
   )
 
-  const today = useMemo(() => new Date().toISOString().split('T')[0], [])
+  const today = new Date().toISOString().split('T')[0]
   const todayStats = useMemo(
     () => stats.daily[today] || { count: 0, totalMinutes: 0 },
     [stats, today]

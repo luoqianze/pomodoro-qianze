@@ -11,10 +11,19 @@ import { useTheme } from './hooks/useTheme'
 import { useStatistics } from './hooks/useStatistics'
 import { DEFAULT_SETTINGS, type SessionType, type Settings as SettingsType } from './types'
 import type { Page } from './constants'
+import { SESSION_COLORS } from './constants'
+
+let audioCtx: AudioContext | null = null
 
 function playNotificationSound() {
   try {
-    const ctx = new AudioContext()
+    if (!audioCtx || audioCtx.state === 'closed') {
+      audioCtx = new AudioContext()
+    }
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume()
+    }
+    const ctx = audioCtx
     const notes = [523.25, 659.25, 783.99]
     notes.forEach((freq, i) => {
       const osc = ctx.createOscillator()
@@ -77,45 +86,71 @@ export default function App() {
     [theme, setTheme]
   )
 
-  // Persist theme toggle back to settings
   useEffect(() => {
     if (!settingsLoaded || settings.theme === theme) return
     const newSettings = { ...settings, theme }
     setSettingsState(newSettings)
     window.electronAPI?.setSettings(newSettings)
-  }, [theme]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [theme])
 
   if (!settingsLoaded) {
     return (
-      <div className="h-screen flex items-center justify-center bg-white dark:bg-gray-900">
-        <span className="text-gray-400">加载中...</span>
+      <div className="h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-10 h-10 rounded-full border-2 border-amber-400 border-t-transparent animate-spin" />
+          <span className="text-sm text-gray-400 font-medium tracking-wider">加载中...</span>
+        </div>
       </div>
     )
   }
 
+  const colors = SESSION_COLORS[timer.sessionType]
+
+  // Dynamic background
+  const bgGradient = theme === 'dark'
+    ? `linear-gradient(165deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)`
+    : timer.sessionType === 'work'
+      ? 'linear-gradient(165deg, #fffbeb 0%, #fef3c7 30%, #fff7ed 70%, #fefce8 100%)'
+      : timer.sessionType === 'shortBreak'
+        ? 'linear-gradient(165deg, #ecfdf5 0%, #d1fae5 30%, #f0fdf4 70%, #ecfdf5 100%)'
+        : 'linear-gradient(165deg, #eff6ff 0%, #dbeafe 30%, #f0f9ff 70%, #eff6ff 100%)'
+
   return (
-    <div className="h-screen flex flex-col bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 overflow-hidden">
-      <div className="flex items-center justify-between px-4 py-2">
-        <div className="w-8" />
-        <span className="text-sm font-medium text-gray-500 dark:text-gray-400">番茄钟</span>
+    <div
+      className="h-screen flex flex-col overflow-hidden transition-all duration-1000 relative"
+      style={{ background: bgGradient }}
+    >
+      {/* Ambient glow */}
+      <div
+        className="absolute top-[-50px] left-1/2 -translate-x-1/2 w-[300px] h-[200px] rounded-full blur-[80px] opacity-40 transition-all duration-1000 pointer-events-none"
+        style={{
+          background: `radial-gradient(circle, ${colors.hex}30 0%, transparent 70%)`,
+        }}
+      />
+
+      {/* Header */}
+      <div className="relative z-10 flex items-center justify-between px-4 py-3">
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full transition-colors duration-700" style={{ backgroundColor: colors.hex }} />
+          <span className="text-sm font-display text-gray-500 dark:text-gray-400 tracking-wider">番茄钟</span>
+        </div>
         <ThemeToggle theme={theme} onToggle={toggleTheme} />
       </div>
 
-      <div className="flex-1 flex flex-col overflow-hidden">
+      {/* Main content */}
+      <div className="relative z-10 flex-1 flex flex-col min-h-0">
         {page === 'timer' && (
-          <div className="flex-1 flex flex-col items-center justify-center px-6">
+          <div className="flex-1 flex flex-col items-center pt-1 gap-4 px-4 pb-4">
             <SessionInfo
               sessionType={timer.sessionType}
               completedPomodoros={timer.completedPomodoros}
               longBreakInterval={settings.longBreakInterval}
             />
-            <div className="mt-8">
-              <Timer
-                timeLeft={timer.timeLeft}
-                sessionType={timer.sessionType}
-                totalTime={timer.getDuration(timer.sessionType)}
-              />
-            </div>
+            <Timer
+              timeLeft={timer.timeLeft}
+              sessionType={timer.sessionType}
+              totalTime={timer.getDuration(timer.sessionType)}
+            />
             <Controls
               isRunning={timer.isRunning}
               sessionType={timer.sessionType}
@@ -127,18 +162,21 @@ export default function App() {
           </div>
         )}
         {page === 'stats' && (
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1">
             <Statistics stats={stats} todayStats={todayStats} weekStats={weekStats} />
           </div>
         )}
         {page === 'settings' && (
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1">
             <Settings settings={settings} onUpdate={handleSettingsUpdate} />
           </div>
         )}
       </div>
 
-      <Navigation current={page} onNavigate={setPage} />
+      {/* Navigation */}
+      <div className="relative z-10">
+        <Navigation current={page} onNavigate={setPage} />
+      </div>
     </div>
   )
 }

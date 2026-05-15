@@ -7,8 +7,11 @@ export function useTimer(settings: Settings, onSessionEnd: (type: SessionType) =
   const [isRunning, setIsRunning] = useState(false)
   const [sessionType, setSessionType] = useState<SessionType>('work')
   const [completedPomodoros, setCompletedPomodoros] = useState(0)
+
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const endTimeRef = useRef<number>(0)
   const onSessionEndRef = useRef(onSessionEnd)
+  const completedRef = useRef(0)
   onSessionEndRef.current = onSessionEnd
 
   const getDuration = useCallback(
@@ -37,27 +40,32 @@ export function useTimer(settings: Settings, onSessionEnd: (type: SessionType) =
   useEffect(() => {
     if (!isRunning) return
 
+    endTimeRef.current = Date.now() + timeLeft * 1000
+
     intervalRef.current = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(intervalRef.current!)
-          intervalRef.current = null
-          setIsRunning(false)
+      const remaining = Math.round((endTimeRef.current - Date.now()) / 1000)
 
-          if (sessionType === 'work') {
-            setCompletedPomodoros((c) => c + 1)
-            onSessionEndRef.current('work')
-          } else {
-            onSessionEndRef.current(sessionType)
-          }
+      if (remaining <= 0) {
+        setTimeLeft(0)
+        clearInterval(intervalRef.current!)
+        intervalRef.current = null
+        setIsRunning(false)
 
-          const next = getNextSession(sessionType, completedPomodoros)
-          setSessionType(next)
-          return getDuration(next)
+        if (sessionType === 'work') {
+          completedRef.current += 1
+          setCompletedPomodoros(completedRef.current)
+          onSessionEndRef.current('work')
+        } else {
+          onSessionEndRef.current(sessionType)
         }
-        return prev - 1
-      })
-    }, 1000)
+
+        const next = getNextSession(sessionType, completedRef.current)
+        setSessionType(next)
+        setTimeLeft(getDuration(next))
+      } else {
+        setTimeLeft(remaining)
+      }
+    }, 200)
 
     return () => {
       if (intervalRef.current) {
@@ -65,7 +73,7 @@ export function useTimer(settings: Settings, onSessionEnd: (type: SessionType) =
         intervalRef.current = null
       }
     }
-  }, [isRunning, sessionType, completedPomodoros, getNextSession, getDuration])
+  }, [isRunning]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Update title bar
   useEffect(() => {
@@ -86,10 +94,10 @@ export function useTimer(settings: Settings, onSessionEnd: (type: SessionType) =
 
   const skip = useCallback(() => {
     setIsRunning(false)
-    const next = getNextSession(sessionType, completedPomodoros)
+    const next = getNextSession(sessionType, completedRef.current)
     setSessionType(next)
     setTimeLeft(getDuration(next))
-  }, [sessionType, completedPomodoros, getNextSession, getDuration])
+  }, [sessionType, getNextSession, getDuration])
 
   return {
     timeLeft, isRunning, sessionType, completedPomodoros,
