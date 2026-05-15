@@ -20,7 +20,7 @@ export function SessionInfo({
           <div key={i}
             className={`w-3 h-3 rounded-full transition-colors ${
               i < completedPomodoros % longBreakInterval
-                ? 'bg-indigo-500'
+                ? 'bg-amber-500'
                 : 'bg-gray-300 dark:bg-gray-600'
             }`} />
         ))}
