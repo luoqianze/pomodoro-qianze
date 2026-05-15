@@ -27,7 +27,7 @@ export function Settings({ settings, onUpdate }: SettingsProps) {
               onChange={(e) => handleChange('workDuration', Number(e.target.value))}
               className="w-16 px-2 py-1 text-center rounded border
                          bg-white dark:bg-gray-700 dark:border-gray-600
-                         focus:outline-none focus:ring-2 focus:ring-amber-400"
+                         focus:outline-none focus:ring-2 focus:ring-indigo-400"
             />
             <span className="text-sm text-gray-500">分钟</span>
           </div>
@@ -45,7 +45,7 @@ export function Settings({ settings, onUpdate }: SettingsProps) {
               onChange={(e) => handleChange('shortBreakDuration', Number(e.target.value))}
               className="w-16 px-2 py-1 text-center rounded border
                          bg-white dark:bg-gray-700 dark:border-gray-600
-                         focus:outline-none focus:ring-2 focus:ring-green-400"
+                         focus:outline-none focus:ring-2 focus:ring-cyan-400"
             />
             <span className="text-sm text-gray-500">分钟</span>
           </div>
@@ -63,7 +63,7 @@ export function Settings({ settings, onUpdate }: SettingsProps) {
               onChange={(e) => handleChange('longBreakDuration', Number(e.target.value))}
               className="w-16 px-2 py-1 text-center rounded border
                          bg-white dark:bg-gray-700 dark:border-gray-600
-                         focus:outline-none focus:ring-2 focus:ring-blue-400"
+                         focus:outline-none focus:ring-2 focus:ring-violet-400"
             />
             <span className="text-sm text-gray-500">分钟</span>
           </div>

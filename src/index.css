@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --color-work: #f59e0b;
+  --color-work: #6366f1;
   --color-short-break: #22c55e;
   --color-long-break: #3b82f6;
 }

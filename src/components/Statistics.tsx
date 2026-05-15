@@ -15,8 +15,8 @@ export function Statistics({ stats, todayStats, weekStats }: StatisticsProps) {
 
       {/* Today */}
       <div className="grid grid-cols-2 gap-4">
-        <div className="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-4 text-center">
-          <div className="text-3xl font-bold text-amber-500">{todayStats.count}</div>
+        <div className="bg-indigo-50 dark:bg-indigo-900/20 rounded-xl p-4 text-center">
+          <div className="text-3xl font-bold text-indigo-500">{todayStats.count}</div>
           <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">今日番茄</div>
         </div>
         <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 text-center">
@@ -37,7 +37,7 @@ export function Statistics({ stats, todayStats, weekStats }: StatisticsProps) {
             <div key={day.date} className="flex flex-col items-center flex-1 gap-1">
               <span className="text-xs text-gray-500">{day.count || ''}</span>
               <div
-                className="w-full bg-amber-400 dark:bg-amber-500 rounded-t transition-all"
+                className="w-full bg-indigo-400 dark:bg-indigo-500 rounded-t transition-all"
                 style={{
                   height: `${day.count > 0 ? Math.max((day.count / maxCount) * 100, 8) : 4}%`,
                 }}

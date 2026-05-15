@@ -48,7 +48,7 @@ export function Navigation({ current, onNavigate }: NavigationProps) {
         <button key={tab.id} onClick={() => onNavigate(tab.id)}
           className={`flex flex-col items-center gap-1 py-3 px-4 transition-colors ${
             current === tab.id
-              ? 'text-amber-500'
+              ? 'text-indigo-500'
               : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
           }`}>
           {tab.icon}
